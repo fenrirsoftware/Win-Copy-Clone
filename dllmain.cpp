@@ -1,11 +1,10 @@
 #include "pch.h"
-#include <Windows.h>
 
-extern "C" __declspec(dllexport) const char* ClipBoardData() { 
+COPY_PASTE_API const char* ClipBoardData() {
     const char* clipboardData = nullptr; 
-    if (OpenClipboard(0)) { 
+    if (OpenClipboard(NULL)) {
         HANDLE hClipboardData = GetClipboardData(CF_TEXT); 
-        if (hClipboardData) { 
+        if (hClipboardData) {
             const char* newClipboardData = static_cast<const char*>(GlobalLock(hClipboardData)); 
             if (newClipboardData) { 
                 clipboardData = newClipboardData; 
@@ -26,4 +25,55 @@ extern "C" __declspec(dllexport) const char* ClipBoardData() {
         CloseClipboard();
     }
     return clipboardData;
+}
+
+COPY_PASTE_API BYTE* GetScreenCapture() {
+    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+    HDC hdcScreen = GetDC(NULL);
+    HDC hdcMem = CreateCompatibleDC(hdcScreen);
+    HBITMAP hBitmap = CreateCompatibleBitmap(hdcScreen, screenWidth, screenHeight);
+    SelectObject(hdcMem, hBitmap);
+    BitBlt(hdcMem, 0, 0, screenWidth, screenHeight, hdcScreen, 0, 0, SRCCOPY);
+    BYTE* lpbitmap = nullptr;
+
+    if (GetAsyncKeyState(VK_SNAPSHOT) & 0x8000) {
+        BITMAPINFOHEADER bi;
+        bi.biSize = sizeof(BITMAPINFOHEADER);
+        bi.biWidth = screenWidth;
+        bi.biHeight = -screenHeight;
+        bi.biPlanes = 1;
+        bi.biBitCount = 24;
+        bi.biCompression = BI_RGB;
+        bi.biSizeImage = 0;
+        bi.biXPelsPerMeter = 0;
+        bi.biYPelsPerMeter = 0;
+        bi.biClrUsed = 0;
+        bi.biClrImportant = 0;
+
+        DWORD dwBmpSize = ((screenWidth * bi.biBitCount + 31) / 32) * 4 * screenHeight;
+        lpbitmap = new BYTE[dwBmpSize];
+        GetDIBits(hdcScreen, hBitmap, 0, screenHeight, lpbitmap, (BITMAPINFO*)&bi, DIB_RGB_COLORS);
+    }
+    else {
+        OpenClipboard(NULL);
+        EmptyClipboard();
+        SetClipboardData(CF_BITMAP, hBitmap);
+        CloseClipboard();
+
+        HBITMAP hClipboardBitmap = static_cast<HBITMAP>(GetClipboardData(CF_BITMAP));
+
+        if (hClipboardBitmap) {
+            BITMAP bitmapInfo;
+            GetObject(hClipboardBitmap, sizeof(BITMAP), &bitmapInfo);
+
+            lpbitmap = new BYTE[bitmapInfo.bmWidthBytes * bitmapInfo.bmHeight];
+            GetBitmapBits(hClipboardBitmap, bitmapInfo.bmWidthBytes * bitmapInfo.bmHeight, lpbitmap);
+        }
+    }
+    DeleteObject(hBitmap);
+    DeleteDC(hdcMem);
+    ReleaseDC(NULL, hdcScreen);
+
+    return lpbitmap;
 }
