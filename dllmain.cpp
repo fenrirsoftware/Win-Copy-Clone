@@ -1,6 +1,6 @@
 #include "pch.h"
 
-COPY_PASTE_API const char* ClipBoardData() {
+const char* ClipBoardData() {
     const char* clipboardData = nullptr; 
     if (OpenClipboard(NULL)) {
         HANDLE hClipboardData = GetClipboardData(CF_TEXT); 
@@ -27,14 +27,16 @@ COPY_PASTE_API const char* ClipBoardData() {
     return clipboardData;
 }
 
-COPY_PASTE_API BYTE* GetScreenCapture() {
+BYTE* GetScreenCapture(int &width, int &height) {
     int screenWidth = GetSystemMetrics(SM_CXSCREEN);
     int screenHeight = GetSystemMetrics(SM_CYSCREEN);
     HDC hdcScreen = GetDC(NULL);
     HDC hdcMem = CreateCompatibleDC(hdcScreen);
     HBITMAP hBitmap = CreateCompatibleBitmap(hdcScreen, screenWidth, screenHeight);
+
     SelectObject(hdcMem, hBitmap);
     BitBlt(hdcMem, 0, 0, screenWidth, screenHeight, hdcScreen, 0, 0, SRCCOPY);
+
     BYTE* lpbitmap = nullptr;
 
     if (GetAsyncKeyState(VK_SNAPSHOT) & 0x8000) {
@@ -54,8 +56,9 @@ COPY_PASTE_API BYTE* GetScreenCapture() {
         DWORD dwBmpSize = ((screenWidth * bi.biBitCount + 31) / 32) * 4 * screenHeight;
         lpbitmap = new BYTE[dwBmpSize];
         GetDIBits(hdcScreen, hBitmap, 0, screenHeight, lpbitmap, (BITMAPINFO*)&bi, DIB_RGB_COLORS);
-    }
-    else {
+        width = screenWidth;
+        height = screenHeight;
+    }else {
         OpenClipboard(NULL);
         EmptyClipboard();
         SetClipboardData(CF_BITMAP, hBitmap);
@@ -66,10 +69,12 @@ COPY_PASTE_API BYTE* GetScreenCapture() {
         if (hClipboardBitmap) {
             BITMAP bitmapInfo;
             GetObject(hClipboardBitmap, sizeof(BITMAP), &bitmapInfo);
-
             lpbitmap = new BYTE[bitmapInfo.bmWidthBytes * bitmapInfo.bmHeight];
             GetBitmapBits(hClipboardBitmap, bitmapInfo.bmWidthBytes * bitmapInfo.bmHeight, lpbitmap);
+            width = bitmapInfo.bmWidth;
+            height = bitmapInfo.bmHeight;
         }
+
     }
     DeleteObject(hBitmap);
     DeleteDC(hdcMem);
