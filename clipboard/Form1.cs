@@ -60,12 +60,17 @@ namespace clipboard
         }
         private string previousData = string.Empty;
         private int textBoxCount = 0;
+
+           
         private void CreateAndFillTextBox(string text)
         {
             TextBox newTextBox = new TextBox();
             newTextBox.Size = new Size(290, 53);
             newTextBox.Location = new Point(5, 5 + textBoxCount * 60);
             newTextBox.Multiline = true;
+            newTextBox.ReadOnly = true;
+           // newTextBox.Enabled = false;
+
             newTextBox.ScrollBars = ScrollBars.Vertical;
             newTextBox.Text = text;
             Controls.Add(newTextBox);
@@ -76,8 +81,10 @@ namespace clipboard
         {
             VScrollBar vScrollBar = new VScrollBar();
             vScrollBar.Dock = DockStyle.Right;
+            
             vScrollBar.Scroll += VScrollBar_Scroll;
             Controls.Add(vScrollBar);
+
         }
 
         private void VScrollBar_Scroll(object sender, ScrollEventArgs e)
