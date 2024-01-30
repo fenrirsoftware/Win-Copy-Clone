@@ -1,63 +1,112 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using WinBlur;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace clipboard
 {
     public partial class Form1 : Form
     {
+
+
+        #region DLL Dosyaları
         [DllImport("CopyPasteRelease.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr ClipBoardData();
 
         private bool dragging = false;
         private Point dragStartPoint;
         private bool keepRunning = true;
+        private NotifyIcon notifyIcon;
+        private
+        const int WH_KEYBOARD_LL = 13;
+        private
+        const int WM_KEYDOWN = 0x0100;
+        private
+        const int VK_CONTROL = 0x11;
+        private
+        const int VK_LWIN = 0x5B;
+        private
+        const int VK_RWIN = 0x5C;
+
+        private static IntPtr hookId = IntPtr.Zero;
+
+        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [
+          return: MarshalAs(UnmanagedType.Bool)
+        ]
+        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+
+        [DllImport("dwmapi.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+        internal static extern void DwmSetWindowAttribute(IntPtr hwnd,
+         DWMWINDOWATTRIBUTE attribute,
+         ref DWM_WINDOW_CORNER_PREFERENCE pvAttribute,
+         uint cbAttribute);
+
+        public enum DWMWINDOWATTRIBUTE
+        {
+            DWMWA_WINDOW_CORNER_PREFERENCE = 33
+        }
+
+        public enum DWM_WINDOW_CORNER_PREFERENCE
+        {
+            DWMWCP_DEFAULT = 0,
+            DWMWCP_DONOTROUND = 1,
+            DWMWCP_ROUND = 2,
+            DWMWCP_ROUNDSMALL = 3
+        }
+
+        #endregion
+
 
         public Form1()
         {
             InitializeComponent();
-            FormBorderStyle = FormBorderStyle.None;
-            DoubleBuffered = true;
-            SetRoundedForm(15); // Set a 5-pixel radius for rounded corners
+            var attribute = DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE;
+            var preference = DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
+            DwmSetWindowAttribute(this.Handle, attribute, ref preference, sizeof(uint));
+            label1.Font = new Font("Fira Code", 9, FontStyle.Bold);
+            rjButton1.Font = new Font("Fira Code", 12, FontStyle.Bold);
+
+            notifyIcon = new NotifyIcon();
+            notifyIcon.Icon = SystemIcons.Application;
+            notifyIcon.Text = "Clipboard App";
+            notifyIcon.Click += NotifyIcon_Click;
+
+            using (Process curProcess = Process.GetCurrentProcess())
+            using (ProcessModule curModule = curProcess.MainModule)
+            {
+                hookId = SetHook(HookCallback, GetModuleHandle(curModule.ModuleName));
+            }
+
+            Application.Run();
+
+            UnhookWindowsHookEx(hookId);
         }
 
-        private void SetRoundedForm(int radius)
-        {
-            // Create a rounded rectangle for the form
-            GraphicsPath formPath = new GraphicsPath();
-            formPath.AddArc(0, 0, radius, radius, 180, 90); // Top-left corner
-            formPath.AddArc(Width - radius, 0, radius, radius, 270, 90); // Top-right corner
-            formPath.AddArc(Width - radius, Height - radius, radius, radius, 0, 90); // Bottom-right corner
-            formPath.AddArc(0, Height - radius, radius, radius, 90, 90); // Bottom-left corner
-            formPath.CloseFigure();
-
-            Region = new Region(formPath);
-        }
-
+      
         private async void Form1_Load(object sender, EventArgs e)
         {
-            flowLayoutPanel1 = new FlowLayoutPanel();
-            flowLayoutPanel1.Size = new Size(410, 420);
-            flowLayoutPanel1.AutoScroll = true;
-
-            Controls.Add(flowLayoutPanel1);
-
-            // Apply rounded corners to the panel
-            GraphicsPath panelPath = new GraphicsPath();
-            panelPath.AddArc(0, 0, 5, 5, 180, 90); // Top-left corner with 5-pixel radius
-            panelPath.AddArc(flowLayoutPanel1.Width - 5, 0, 5, 5, 270, 90); // Top-right corner
-            panelPath.AddArc(flowLayoutPanel1.Width - 5, flowLayoutPanel1.Height - 5, 5, 5, 0, 90); // Bottom-right corner
-            panelPath.AddArc(0, flowLayoutPanel1.Height - 5, 5, 5, 90, 90); // Bottom-left corner
-            panelPath.CloseFigure();
-
-            flowLayoutPanel1.Region = new Region(panelPath);
-
+            flowLayoutPanel2.AutoScroll = true;
             await LoadAsyncData();
+            this.KeyPreview = true;
+
         }
 
         private async Task LoadAsyncData()
@@ -80,55 +129,39 @@ namespace clipboard
         private int textBoxCount = 0;
         private FlowLayoutPanel flowLayoutPanel1;
 
-
         private void CreateAndFillTextBox(string text)
         {
-
-
-            Button newTextBox = new Button();
-            newTextBox.Size = new Size(338, 70);
+            RJButton newTextBox = new RJButton();
+            newTextBox.Size = new Size(335, 70);
+            newTextBox.BorderRadius = 8;
             newTextBox.FlatStyle = FlatStyle.Flat;
             newTextBox.FlatAppearance.BorderSize = 0;
-            newTextBox.Location = new Point(50, 50 + textBoxCount * 90);
             newTextBox.TextAlign = ContentAlignment.MiddleLeft;
 
             newTextBox.Text = text;
-            newTextBox.Font = new Font("Arial", 9, FontStyle.Regular);
-            newTextBox.ForeColor = Color.FromArgb(220, 220, 220);
-            newTextBox.BackColor = Color.FromArgb(60, 60, 60);
+            newTextBox.Font = new Font("Fira Code", 9, FontStyle.Bold);
+            newTextBox.BackColor = Color.FromArgb(40, 40, 40);
 
             newTextBox.Click += Button_Click;
 
-            Controls.Add(newTextBox);
-            textBoxCount++;
-            flowLayoutPanel1.Controls.Add(newTextBox);
-
-
-
-            GraphicsPath txtpath = new GraphicsPath();
-            txtpath.AddArc(0, 0, 5, 5, 180, 90); // Top-left corner with 5-pixel radius
-            txtpath.AddArc(newTextBox.Width - 5, 0, 5, 5, 270, 90); // Top-right corner
-            txtpath.AddArc(newTextBox.Width - 5, newTextBox.Height - 5, 5, 5, 0, 90); // Bottom-right corner
-            txtpath.AddArc(0, newTextBox.Height - 5, 5, 5, 90, 90); // Bottom-left corner
-            txtpath.CloseFigure();
-
-            newTextBox.Region = new Region(txtpath);
-
-
-
-
-
-
-
-
-
+            newTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            flowLayoutPanel2.Controls.Add(newTextBox);
+            flowLayoutPanel2.Controls.SetChildIndex(newTextBox, 0);
         }
 
         private void Button_Click(object sender, EventArgs e)
         {
-            // TODO: Butona tıklama işlemleri
-        }
+            {
+                if (sender is RJButton clickedButton)
+                {
+                    
+                    string buttonText = clickedButton.Text;
+                    Clipboard.SetText(buttonText);
 
+                }
+            }
+        }
+     
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -160,9 +193,56 @@ namespace clipboard
             keepRunning = false;
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
+        private void rjButton1_Click(object sender, EventArgs e)
         {
-            // Your pictureBox1 click event handling
+            this.Hide();
+            notifyIcon.Visible = true;
         }
+        private void NotifyIcon_Click(object sender, EventArgs e)
+        {
+
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+        }
+
+        private void Form1_Deactivate(object sender, EventArgs e)
+        {
+
+            this.Hide();
+            notifyIcon.Visible = true;
+        }
+
+
+
+        #region Keyboard Hook
+        private static IntPtr SetHook(LowLevelKeyboardProc proc, IntPtr hMod)
+        {
+            using (Process curProcess = Process.GetCurrentProcess())
+            using (ProcessModule curModule = curProcess.MainModule)
+            {
+                return SetWindowsHookEx(WH_KEYBOARD_LL, proc, hMod, 0);
+            }
+        }
+
+        private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
+            {
+                int vkCode = Marshal.ReadInt32(lParam);
+
+                if (vkCode == VK_CONTROL || vkCode == VK_LWIN || vkCode == VK_RWIN)
+                {
+                    this.Show();
+                    this.WindowState = FormWindowState.Normal;
+                }
+            }
+
+            return CallNextHookEx(hookId, nCode, wParam, lParam);
+        }
+
+        #endregion
+
+
+
     }
 }
