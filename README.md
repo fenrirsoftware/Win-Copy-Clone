@@ -1,5 +1,6 @@
 # CopyBoard
 
+# SORUNLAR VE ÇÖZÜMLERİ
 ## Sorun 1: C++ C# Entegrasyonu ve Ram Erişimi Sorunu
 
 ![Sorun 1 Görüntü](https://i.hizliresim.com/tgyf6ig.jpg)
