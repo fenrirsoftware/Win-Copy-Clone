@@ -78,9 +78,9 @@ namespace clipboard
         public Form1()
         {
             InitializeComponent();
-            var attribute = DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE;
-            var preference = DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
-            DwmSetWindowAttribute(this.Handle, attribute, ref preference, sizeof(uint));
+            //var attribute = DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE;
+            //var preference = DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
+            //DwmSetWindowAttribute(this.Handle, attribute, ref preference, sizeof(uint));
             label1.Font = new Font("Fira Code", 9, FontStyle.Bold);
             rjButton1.Font = new Font("Fira Code", 12, FontStyle.Bold);
 
@@ -230,7 +230,11 @@ namespace clipboard
             {
                 int vkCode = Marshal.ReadInt32(lParam);
 
-                if (vkCode == VK_CONTROL || vkCode == VK_LWIN || vkCode == VK_RWIN)
+                // CTRL + B tuş kombinasyonu kontrolü
+                bool ctrlPressed = (Control.ModifierKeys & Keys.Control) != 0;
+                bool bPressed = ((Keys)vkCode == Keys.B);
+
+                if (ctrlPressed && bPressed)
                 {
                     this.Show();
                     this.WindowState = FormWindowState.Normal;
@@ -239,6 +243,30 @@ namespace clipboard
 
             return CallNextHookEx(hookId, nCode, wParam, lParam);
         }
+
+        // Diğer kodlar aynı kalır
+
+
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct KBDLLHOOKSTRUCT
+        {
+            public int vkCode;
+            public int scanCode;
+            public int flags;
+            public int time;
+            public IntPtr dwExtraInfo;
+        }
+
+        private enum KeyFlags
+        {
+            LLKHF_EXTENDED = 0x01,
+            LLKHF_INJECTED = 0x10,
+            LLKHF_ALTDOWN = 0x20,
+            LLKHF_UP = 0x80,
+        }
+
+
 
         #endregion
 
