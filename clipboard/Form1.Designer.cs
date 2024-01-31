@@ -74,7 +74,7 @@
             this.rjButton1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(44)))), ((int)(((byte)(44)))));
             this.rjButton1.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(44)))), ((int)(((byte)(44)))));
             this.rjButton1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.rjButton1.BorderColor = System.Drawing.Color.White;
+            this.rjButton1.BorderColor = System.Drawing.Color.Black;
             this.rjButton1.BorderRadius = 0;
             this.rjButton1.BorderSize = 0;
             this.rjButton1.FlatAppearance.BorderSize = 0;
