@@ -29,8 +29,7 @@
   -  ![Görüntü 2](https://i.hizliresim.com/elqoxcb.jpg)
 
 ## Sorun 4: Tasarım Kararları ve WinForm Sınırları
-
-![Sorun 4 Görüntü 1](https://i.hizliresim.com/jtk49mv.jpg)
+![Ekran görüntüsü 2024-01-31 134204](https://github.com/fenrirsoftware/Win-Copy-Remake/assets/89170235/eaea8d10-d35d-4db2-9c48-d9e8b9c9aab0)
 
 - **Açıklama:** Border radius ve Glassmorphism tasarımının uygulanması.
 - **Çözüm:**
