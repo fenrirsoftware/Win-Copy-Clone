@@ -78,9 +78,12 @@ namespace clipboard
         public Form1()
         {
             InitializeComponent();
-            //var attribute = DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE;
-            //var preference = DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
-            //DwmSetWindowAttribute(this.Handle, attribute, ref preference, sizeof(uint));
+            var attribute = DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE;
+            var preference = DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
+            DwmSetWindowAttribute(this.Handle, attribute, ref preference, sizeof(uint));
+
+
+            //bilgisayarınız win11 altı bir sürümdeyse yukarıdaki 3 satırı yorum satırı yapın.
             label1.Font = new Font("Fira Code", 9, FontStyle.Bold);
             rjButton1.Font = new Font("Fira Code", 12, FontStyle.Bold);
 
