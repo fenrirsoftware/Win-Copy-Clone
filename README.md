@@ -1,38 +1,58 @@
-# CopyBoard
+<div align="center" >
 
-# SORUNLAR VE ÇÖZÜMLERİ
-## Sorun 1: C++ C# Entegrasyonu ve Ram Erişimi Sorunu
+  # 📋 CopyBoard 📋
+  ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)
+  ![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
+  ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white)
+</div>
 
-![Sorun 1 Görüntü](https://i.hizliresim.com/tgyf6ig.jpg)
+# SORUNLAR
+- ## Sorun 1: _Hatalı Dönüş değerleri_
+  _Windows API ile entegrasyon sırasında RAM'e erişimde sorunlar ve boş ya da hatalı veri dönmesi._
+  <div align="center" >
+    <img src="https://github.com/fenrirsoftware/Win-Copy-Remake/assets/84701901/3449b53f-48ab-4f9a-b649-fc0d1a4f48aa" width=35% height=35% >
+  </div>
 
-- **Açıklama:** Windows API ile entegrasyon sırasında rame erişimde sorunlar ve boş ya da hatalı veri dönmesi.
-- **Çözüm:**
-  -  //Sayın helmsys buraya ekleme yapacak
+- ## Sorun 2: _C++ ve C# Veri Gösterme Sorunu_
+  _C++'tan gelen veriyi C# WinForm'da gösterirken `System.AccessViolationException` hatası._
+  <div align="center" >
+    <img src="https://github.com/fenrirsoftware/Win-Copy-Remake/assets/84701901/39fa2c31-1b92-4691-8faf-a0add2de107e" width=80% height=40% >
+  </div>
 
-## Sorun 2: C++ DLL ve C# WinForm Veri Gösterme Sorunu
+- ## Sorun 3: _C# Form Tasarımı Sorunu_
+  _Windows tasarımına birebir benzeyen bir C# form tasarımı oluşturmak._
+    <div align="center" >
+    <img src="https://github.com/fenrirsoftware/Win-Copy-Remake/assets/84701901/ab57cb99-9e33-46d0-b9b0-ac289b55a638" width=80% height=40% >
+  </div>
 
-![Sorun 2 Görüntü](https://i.hizliresim.com/h6aross.jpg)
+- ## Sorun 4: _Tasarım Kararları ve WinForm Sınırları_
+  _Border radius ve Glassmorphism tasarımının uygulanması._
+  <div align="center" >
+    <img src="https://github.com/fenrirsoftware/Win-Copy-Remake/assets/84701901/02d86062-2881-480c-a16c-952ea3986221" width=35% height=40% >
+    <img src="https://github.com/fenrirsoftware/Win-Copy-Remake/assets/84701901/f26f30d2-a441-4d2d-b563-3c7ba25ca852" width=60% height=30% >
+  </div>
+---
+# ÇÖZÜMLER
+  - ### _**Çözüm-1:**_
+    _Arayüzün kendisinden bir metin kopyaladığımızda verdiği bir hataydı. Bu hatayı çözmek için Arayüz içerisinde bu tür olayların yapılabilmesini kısıtlamamız yeterliydi. Oldukça spesifik bir hatayı basit bir işlem ile çözmemiz diğer sorunlara ayıracak vaktimize kazanç sağladı._
+  
+  - ### _**Çözüm-2:**_
+    _Yapıştırma işlemini başlarda dinliyorduk, çünkü kopyaladığımız metin verisini bir şekilde kullanmamız gerekiyordu. Fakat dinlememize gerek kalmadan kullanabildiğimizi görünce bu sorunu böyle çözdük. Sorunun aslı geçersiz ram adresine ulaşmaya çalışıyor oluşumuzdu._
 
-- **Açıklama:** C++ DLL'den gelen veriyi C# WinForm'da gösterirken "System.AccessViolationException" hatası.
-- **Çözüm:**
-  - //Sayın helmsys buraya ekleme yapacak
+  - ### _**Çözüm-3:**_
+    _Bunifu, DevExpress veya diğer üçüncü taraf araçları kullanarak özelleştirilebilir componentler kullanmak ya da kendi komponentlerini oluşturmak_ **_(bir adet button özelleştirme paketi projeye dahildir)_**
+  
+  - ### _**Çözüm-4:**_
+    _Projenin başında biraz Glassmorphism ile çalışmanın faydası olacağını düşünnmüştüm lakin hem ana üründe bu tasarım yoktu hem de çalışma olarak sorunluydu. Bundan kaynaklı olarak Glassmorphismden vazgeçtik. Border Radius için internetteki tüm çözümleri_ _**(wpf ve winform)**_ _denemenize rağmen asla iyi bir sonuç alamayacaksınız. Her daim yaptığınız border radius pikselli kalacaktır. Bunun çözümü olarak Windows UI apisinden Form border radius özelliği çekildi._
+---
+- ## Final: _**Projenin Sonu**_
 
-## Sorun 3: C# Form Tasarımı Sorunu
+  <div align="center" >
+    <img src="https://github.com/fenrirsoftware/Win-Copy-Remake/assets/84701901/f26f30d2-a441-4d2d-b563-3c7ba25ca852" width=80% height=80% >
+  </div>
 
-![Sorun 4 Görüntü 2](https://i.hizliresim.com/8l9yi1n.jpg)
 
-- **Açıklama:** Windows tasarımına birebir benzeyen bir C# form tasarımı oluşturmak.
-- **Çözüm:**
-  - Bunifu, DevExpress veya diğer üçüncü taraf araçları kullanarak özelleştirilebilir componentler kullanmak ya da kendi komponentlerini oluşturmak ( bir adet button özelleştirme paketi projeye dahildir)
-  - Windows UI Apilerinden yardım alarak profesyonel bir tasarım ortaya çıkartmak.
-  - Final tasarımı
-  -  ![Görüntü 2](https://i.hizliresim.com/elqoxcb.jpg)
+<h3> 
 
-## Sorun 4: Tasarım Kararları ve WinForm Sınırları
-![Ekran görüntüsü 2024-01-31 134204](https://github.com/fenrirsoftware/Win-Copy-Remake/assets/89170235/eaea8d10-d35d-4db2-9c48-d9e8b9c9aab0)
-
-- **Açıklama:** Border radius ve Glassmorphism tasarımının uygulanması.
-- **Çözüm:**
-  - Projenin başında biraz Glassmorphism ile çalışmanın faydası olacağını düşünnmüştüm lakin hem ana üründe bu tasarım yoktu hem de çalışma olarak sorunluydu. Bundan kaynaklı olarak Glassmorphismden vazgeçtik.
-  - Border Radius için internetteki tüm çözümleri (wpf ve winform) denemenize rağmen asla iyi bir sonuç alamayacaksınız. Her daim yaptığınız border radius pikselli kalacaktır. Bunun çözümü olarak Windows UI apisinden Form border radius özelliği çekildi. 
-
+_Beğendiyseniz_ "⭐"  _verebilirsiniz!_
+</h3>
