@@ -117,7 +117,7 @@ namespace clipboard
                 IntPtr result = await Task.Run(() => ClipBoardData());
                 string message = Marshal.PtrToStringAnsi(result);
 
-                if (message != previousData)
+                if (message != previousData && message != null)
                 {
                     CreateAndFillTextBox(message);
                     previousData = message;
